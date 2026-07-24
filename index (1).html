@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Starvideos — busque vídeos pelo número de catálogo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css_styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand">Starvideos</div>
+  <nav class="main-nav">
+    <a href="#home">Home</a>
+    <a href="#pesquisa">Pesquisa</a>
+    <a href="#links">Links</a>
+    <a href="#contato">Contato</a>
+    <a href="#sobre">Sobre</a>
+  </nav>
+</header>
+
+<section id="home" class="hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <span class="eyebrow">Catálogo público · acesso por número</span>
+    <h1>Todo vídeo tem um número.<br>Todo número tem uma história.</h1>
+    <p class="hero-sub">Starvideos é um catálogo de vídeos organizados por identificador único — como uma ficha de biblioteca, só que em vídeo.</p>
+    <a href="#pesquisa" class="cta-btn">Ir para a pesquisa ↓</a>
+  </div>
+</section>
+
+<section id="pesquisa" class="search-section">
+  <div class="search-inner">
+    <span class="section-label">002 / Pesquisa</span>
+    <h2>Buscar por número de catálogo</h2>
+    <p class="section-sub">Digite o identificador único do vídeo (ex: <span class="mono">04521</span>) para localizá-lo no catálogo.</p>
+
+    <form class="search-form" id="search-form">
+      <span class="hash">Nº</span>
+      <input type="text" id="search-input" placeholder="00000" maxlength="8" inputmode="numeric" autocomplete="off">
+      <button type="submit">Buscar</button>
+    </form>
+
+    <div class="search-result" id="search-result"></div>
+
+    <div class="catalog-hint">
+      <span class="section-label">Amostra do catálogo</span>
+      <div class="catalog-chips" id="catalog-chips"></div>
+    </div>
+  </div>
+</section>
+
+<section id="links" class="links-section">
+  <span class="section-label">003 / Links</span>
+  <h2>Links úteis</h2>
+  <ul class="link-list">
+    <li><a href="#sobre">Normas de uso e proibições</a></li>
+    <li><a href="#contato">Canal de denúncia</a></li>
+    <li><a href="#pesquisa">Buscar no catálogo</a></li>
+    <li><a href="#home">Voltar ao início</a></li>
+  </ul>
+</section>
+
+<section id="contato" class="contact-section">
+  <span class="section-label">004 / Contato</span>
+  <h2>Fale conosco</h2>
+  <p class="section-sub">Para denunciar conteúdo, solicitar remoção, ou tirar dúvidas sobre um vídeo do catálogo, entre em contato.</p>
+  <div class="contact-grid">
+    <div class="contact-card">
+      <h3>Denúncia de conteúdo</h3>
+      <p>Reporte vídeos que violem as normas — especialmente qualquer suspeita de menor de idade ou conteúdo sem consentimento. Resposta prioritária.</p>
+      <a href="mailto:denuncia@starvideos.exemplo" class="contact-link">denuncia@starvideos.exemplo</a>
+    </div>
+    <div class="contact-card">
+      <h3>Suporte geral</h3>
+      <p>Dúvidas sobre a plataforma, sugestões ou problemas técnicos.</p>
+      <a href="mailto:contato@starvideos.exemplo" class="contact-link">contato@starvideos.exemplo</a>
+    </div>
+  </div>
+</section>
+
+<section id="sobre" class="about-section">
+  <span class="section-label">005 / Sobre</span>
+  <h2>Sobre o Starvideos</h2>
+  <p class="section-sub">Starvideos é um catálogo de vídeos indexados por número único. Para manter a plataforma segura, todo conteúdo e todo uso está sujeito às normas abaixo.</p>
+
+  <div class="rules-block">
+    <h3>Normas de uso e proibições</h3>
+    <ul class="rules-list">
+      <li><strong>Proibido para menores de 18 anos.</strong> O uso da plataforma — tanto para assistir quanto para publicar — é restrito a maiores de idade. Nenhuma conta ou acesso é permitido a menores de 18 anos.</li>
+      <li><strong>Proibida qualquer participação de menores.</strong> É terminantemente proibido publicar, buscar ou compartilhar qualquer vídeo que envolva, retrate ou sugira a participação de menores de idade, sob qualquer circunstância. Conteúdo assim é removido imediatamente e reportado às autoridades competentes.</li>
+      <li><strong>Consentimento obrigatório.</strong> Só pode ser publicado vídeo de pessoas que deram consentimento claro e informado para aparecer e serem divulgadas. Conteúdo não consensual (incluindo gravações íntimas compartilhadas sem autorização) é proibido.</li>
+      <li><strong>Sem conteúdo explícito.</strong> A plataforma não permite conteúdo sexual explícito, nudez ou material adulto.</li>
+      <li><strong>Sem violência, ódio ou ilegalidade.</strong> Conteúdo que incite violência, discurso de ódio, ou qualquer atividade ilegal não é permitido.</li>
+      <li><strong>Denúncia e remoção.</strong> Qualquer pessoa pode denunciar um vídeo pelo canal de contato. Conteúdo denunciado é analisado e removido caso viole as normas, com prioridade máxima para denúncias envolvendo menores.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="admin" class="admin-section">
+  <span class="section-label">006 / Painel do administrador</span>
+  <h2>Adicionar conteúdo ao catálogo</h2>
+  <p class="section-sub">Área restrita — apenas quem administra a plataforma deve acessar esta seção. Preencha os dados e gere o código para publicar.</p>
+
+  <div class="admin-gate" id="admin-gate">
+    <input type="password" id="admin-pass" placeholder="Senha de administrador">
+    <button type="button" id="admin-unlock">Entrar</button>
+    <p class="admin-warning">⚠ Esta é uma proteção simples, só para uso pessoal — não é um sistema de login seguro.</p>
+  </div>
+
+  <div class="admin-panel" id="admin-panel" hidden>
+    <div class="admin-form">
+      <label>Número do catálogo
+        <input type="text" id="f-id" placeholder="05001" inputmode="numeric">
+      </label>
+      <label>Título
+        <input type="text" id="f-title" placeholder="Nome do vídeo ou faixa">
+      </label>
+      <label>Tipo
+        <select id="f-type">
+          <option value="Vídeo">Vídeo</option>
+          <option value="Música">Música</option>
+        </select>
+      </label>
+      <label>Categoria
+        <input type="text" id="f-category" placeholder="Ex: Documentário, Pop, Educação...">
+      </label>
+      <button type="button" id="f-generate">Gerar código</button>
+    </div>
+
+    <div class="admin-output" id="admin-output" hidden>
+      <p class="section-sub">Copie o bloco abaixo e cole dentro do array <span class="mono">CATALOG</span>, no arquivo <span class="mono">js_script.js</span>. Depois faça commit no GitHub — a Vercel publica sozinha.</p>
+      <textarea id="admin-code" readonly></textarea>
+      <button type="button" id="admin-copy">Copiar código</button>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <p>Starvideos — catálogo demonstrativo. Nº de amostra ativos no catálogo: <span id="footer-count">—</span></p>
+  <a href="#admin" class="admin-link">admin</a>
+</footer>
+
+<script src="js_script.js"></script>
+</body>
+</html>
