@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Starvideos — feed de vídeos curtos (demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0A0A0C;
+    --surface: rgba(255,255,255,0.06);
+    --cyan: #00F0FF;
+    --magenta: #FF2E63;
+    --text: #F5F5F7;
+    --text-dim: rgba(245,245,247,0.6);
+    --text-faint: rgba(245,245,247,0.35);
+    --font-display: 'Archivo Black', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
+
+  html, body{
+    background: #000;
+    color: var(--text);
+    font-family: var(--font-body);
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .phone-stage{
+    height: 100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(ellipse 800px 500px at 20% 10%, rgba(0,240,255,0.06), transparent 60%),
+      radial-gradient(ellipse 800px 500px at 80% 90%, rgba(255,46,99,0.06), transparent 60%),
+      #050506;
+  }
+
+  .app{
+    position:relative;
+    width: 100%;
+    max-width: 420px;
+    height: 100vh;
+    max-height: 900px;
+    background: #000;
+    overflow:hidden;
+  }
+  @media (min-width: 460px){
+    .app{ border-radius: 32px; box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 40px 100px rgba(0,0,0,0.6); }
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    position:absolute;
+    top:0; left:0; right:0;
+    z-index: 30;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 18px 16px 10px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.55), transparent);
+  }
+  .wordmark{
+    font-family: var(--font-display);
+    font-size: 16px;
+    letter-spacing: 0.01em;
+    position:relative;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .wordmark::before, .wordmark::after{
+    content:'STARVIDEOS';
+    position:absolute; left:0; top:0;
+    opacity: 0.55;
+  }
+  .wordmark::before{ color: var(--cyan); transform: translate(-1.5px,-1px); }
+  .wordmark::after{ color: var(--magenta); transform: translate(1.5px,1px); }
+
+  .tabs{
+    display:flex;
+    gap: 20px;
+    font-size: 14.5px;
+    font-weight:600;
+    color: var(--text-faint);
+  }
+  .tabs span{ position:relative; padding-bottom:6px; cursor:pointer; transition: color .2s; }
+  .tabs span.active{ color: var(--text); }
+  .tabs span.active::after{
+    content:'';
+    position:absolute; left:50%; bottom:0;
+    transform: translateX(-50%);
+    width: 18px; height: 2.5px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--magenta));
+  }
+
+  /* ---------- Feed ---------- */
+  .feed{
+    height: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+  }
+  .feed::-webkit-scrollbar{ display:none; }
+
+  .slide{
+    position:relative;
+    height: 100%;
+    width:100%;
+    scroll-snap-align: start;
+    overflow:hidden;
+    background: #050506;
+  }
+  .slide video{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit: cover;
+    filter: saturate(1.05) contrast(1.03);
+  }
+  .slide::after{
+    content:'';
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, transparent 24%, transparent 55%, rgba(0,0,0,0.75) 100%);
+    pointer-events:none;
+  }
+
+  /* mute indicator flash */
+  .tap-flash{
+    position:absolute;
+    inset:0;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:none;
+    z-index: 5;
+  }
+  .tap-flash svg{
+    width: 74px; height:74px;
+    opacity:0;
+    color: var(--magenta);
+    filter: drop-shadow(0 0 14px rgba(255,46,99,0.6));
+  }
+  .tap-flash.burst svg{ animation: heart-burst 0.7s ease forwards; }
+  @keyframes heart-burst{
+    0%{ opacity:0; transform: scale(0.4); }
+    30%{ opacity:1; transform: scale(1.15); }
+    45%{ transform: scale(1); }
+    100%{ opacity:0; transform: scale(1.3); }
+  }
+
+  /* ---------- Right action rail ---------- */
+  .rail{
+    position:absolute;
+    right: 10px;
+    bottom: 108px;
+    z-index: 20;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 20px;
+  }
+  .avatar-stack{
+    position:relative;
+    margin-bottom: 4px;
+  }
+  .avatar{
+    width: 46px; height:46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan), var(--magenta));
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--font-display);
+    font-size: 15px;
+    color:#000;
+    border: 2px solid #000;
+  }
+  .avatar-follow{
+    position:absolute;
+    bottom:-8px; left:50%;
+    transform: translateX(-50%);
+    width:18px; height:18px;
+    border-radius:50%;
+    background: var(--magenta);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 13px;
+    font-weight:800;
+    color:#fff;
+    border: 2px solid #000;
+  }
+
+  .rail-btn{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 5px;
+    background:none;
+    border:none;
+    color: var(--text);
+    cursor:pointer;
+  }
+  .rail-btn svg{ width: 30px; height:30px; transition: transform .15s ease; }
+  .rail-btn:active svg{ transform: scale(0.82); }
+  .rail-btn .count{
+    font-size: 11.5px;
+    font-weight:600;
+    color: var(--text-dim);
+  }
+  .rail-btn.liked svg{ color: var(--magenta); }
+
+  .disc{
+    width: 40px; height:40px;
+    border-radius:50%;
+    background: conic-gradient(from 0deg, #1a1a1d, #333 40%, #1a1a1d 60%);
+    display:flex; align-items:center; justify-content:center;
+    animation: spin 5s linear infinite;
+    border: 3px solid #16161a;
+  }
+  .disc::after{
+    content:'';
+    width:14px; height:14px;
+    border-radius:50%;
+    background: linear-gradient(135deg, var(--cyan), var(--magenta));
+  }
+  @keyframes spin{ from{ transform: rotate(0);} to{ transform: rotate(360deg);} }
+
+  /* ---------- Bottom caption block ---------- */
+  .caption-block{
+    position:absolute;
+    left: 16px;
+    right: 78px;
+    bottom: 22px;
+    z-index: 20;
+  }
+  .handle{
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 6px;
+    display:flex;
+    align-items:center;
+    gap: 6px;
+  }
+  .handle .badge{
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--cyan);
+    border: 1px solid rgba(0,240,255,0.4);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .caption-text{
+    font-size: 13.5px;
+    line-height:1.45;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .caption-text .tag{ color: var(--cyan); font-weight:600; }
+
+  .sound-line{
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-dim);
+    overflow:hidden;
+  }
+  .sound-line svg{ width:13px; height:13px; flex-shrink:0; }
+  .sound-line .marquee{
+    white-space:nowrap;
+    overflow:hidden;
+    max-width: 190px;
+  }
+  .sound-line .marquee span{
+    display:inline-block;
+    animation: marquee 8s linear infinite;
+  }
+  @keyframes marquee{
+    0%{ transform: translateX(0); }
+    100%{ transform: translateX(-50%); }
+  }
+
+  /* ---------- Bottom nav ---------- */
+  .bottom-nav{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    z-index: 30;
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    padding: 10px 6px calc(10px + env(safe-area-inset-bottom));
+    background: linear-gradient(0deg, rgba(0,0,0,0.65), transparent);
+  }
+  .nav-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 3px;
+    color: var(--text-faint);
+    font-size: 10px;
+    font-weight:600;
+  }
+  .nav-item svg{ width:23px; height:23px; }
+  .nav-item.active{ color:#fff; }
+  .nav-item.active svg{ color: var(--cyan); filter: drop-shadow(0 0 6px rgba(0,240,255,0.5)); }
+  .nav-create{
+    width: 42px; height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--cyan), var(--magenta));
+    display:flex; align-items:center; justify-content:center;
+    margin-top: -6px;
+  }
+  .nav-create svg{ width:18px; height:18px; color:#000; }
+
+  /* demo badge */
+  .demo-tag{
+    position:fixed;
+    top: 12px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing:0.08em;
+    color: var(--text-faint);
+    background: rgba(0,0,0,0.5);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+    pointer-events:none;
+  }
+</style>
+</head>
+<body>
+
+<span class="demo-tag">STARVIDEOS · DEMO VISUAL · SEM DADOS REAIS</span>
+
+<div class="phone-stage">
+  <div class="app">
+
+    <div class="topbar">
+      <div class="wordmark">STARVIDEOS</div>
+      <div class="tabs">
+        <span>Seguindo</span>
+        <span class="active">Para você</span>
+      </div>
+    </div>
+
+    <div class="feed" id="feed"></div>
+
+    <div class="bottom-nav">
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3z"/></svg>
+        Início
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 18a8 8 0 1 1 5.29-14.02l5.37 5.36-1.42 1.42-5.36-5.37A6 6 0 1 0 10 16a5.98 5.98 0 0 0 4.22-1.74l1.42 1.42A8 8 0 0 1 10 18z"/></svg>
+        Buscar
+      </div>
+      <div class="nav-create">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4a2 2 0 0 0-2 2v14l4-4h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/></svg>
+        Inbox
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6z"/></svg>
+        Perfil
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const VIDEOS = [
+    {
+      src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      handle: '@estudio.verde', verified:true,
+      caption: 'Um coelho, uma manhã e muita determinação. <span class="tag">#natureza</span> <span class="tag">#3d</span>',
+      sound: 'Trilha original — Estúdio Verde', likes:'128K', comments:'2.431', shares:'5.902'
+    },
+    {
+      src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+      handle: '@fogo.criativo', verified:false,
+      caption: 'Quando o projeto finalmente compila sem erro 🔥 <span class="tag">#dev</span>',
+      sound: 'som original — fogo.criativo', likes:'84.2K', comments:'913', shares:'2.104'
+    },
+    {
+      src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      handle: '@mundo.onirico', verified:true,
+      caption: 'Explorando cenários surreais essa semana ✨ <span class="tag">#animacao</span> <span class="tag">#arte</span>',
+      sound: 'ambiente sintético — mundo.onirico', likes:'256K', comments:'6.802', shares:'11.3K'
+    },
+    {
+      src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+      handle: '@estrada.livre', verified:false,
+      caption: 'Sexta-feira pedindo estrada 🚗💨 <span class="tag">#roadtrip</span>',
+      sound: 'faixa acelerada — estrada.livre', likes:'41.7K', comments:'588', shares:'974'
+    }
+  ];
+
+  const feed = document.getElementById('feed');
+
+  const HEART_FILLED = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-6.7-4.35-9.3-8.03C1.1 10.9 1.5 8 3.9 6.6c2-1.15 4.15-.5 5.4 1.02L12 10.5l2.7-2.88c1.25-1.52 3.4-2.17 5.4-1.02 2.4 1.4 2.8 4.3 1.2 6.37C18.7 16.65 12 21 12 21z"/></svg>';
+  const HEART_OUTLINE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-6.7-4.35-9.3-8.03C1.1 10.9 1.5 8 3.9 6.6c2-1.15 4.15-.5 5.4 1.02L12 10.5l2.7-2.88c1.25-1.52 3.4-2.17 5.4-1.02 2.4 1.4 2.8 4.3 1.2 6.37C18.7 16.65 12 21 12 21z"/></svg>';
+  const COMMENT_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16v12H7l-3 3z"/></svg>';
+  const SHARE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 4l6 6-6 6v-4c-5 0-8 2-10 6 0-7 3-11 10-11V4z"/></svg>';
+  const NOTE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+
+  VIDEOS.forEach((v, i) => {
+    const slide = document.createElement('div');
+    slide.className = 'slide';
+    slide.innerHTML = `
+      <video src="${v.src}" loop muted playsinline preload="${i===0 ? 'auto' : 'metadata'}"></video>
+      <div class="tap-flash"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-6.7-4.35-9.3-8.03C1.1 10.9 1.5 8 3.9 6.6c2-1.15 4.15-.5 5.4 1.02L12 10.5l2.7-2.88c1.25-1.52 3.4-2.17 5.4-1.02 2.4 1.4 2.8 4.3 1.2 6.37C18.7 16.65 12 21 12 21z"/></svg></div>
+
+      <div class="rail">
+        <div class="avatar-stack">
+          <div class="avatar">${v.handle.charAt(1).toUpperCase()}</div>
+          <div class="avatar-follow">+</div>
+        </div>
+        <button class="rail-btn like-btn">
+          ${HEART_OUTLINE}
+          <span class="count">${v.likes}</span>
+        </button>
+        <button class="rail-btn">
+          ${COMMENT_ICON}
+          <span class="count">${v.comments}</span>
+        </button>
+        <button class="rail-btn">
+          ${SHARE_ICON}
+          <span class="count">${v.shares}</span>
+        </button>
+        <div class="disc"></div>
+      </div>
+
+      <div class="caption-block">
+        <div class="handle">${v.handle} ${v.verified ? '<span class="badge">✓</span>' : ''}</div>
+        <div class="caption-text">${v.caption}</div>
+        <div class="sound-line">
+          ${NOTE_ICON}
+          <div class="marquee"><span>${v.sound} &nbsp;&nbsp;•&nbsp;&nbsp; ${v.sound} &nbsp;&nbsp;•&nbsp;&nbsp;</span></div>
+        </div>
+      </div>
+    `;
+    feed.appendChild(slide);
+
+    // like toggle
+    const likeBtn = slide.querySelector('.like-btn');
+    let liked = false;
+    likeBtn.addEventListener('click', () => {
+      liked = !liked;
+      likeBtn.classList.toggle('liked', liked);
+      likeBtn.innerHTML = (liked ? HEART_FILLED : HEART_OUTLINE) + `<span class="count">${v.likes}</span>`;
+    });
+
+    // double tap to like with heart burst
+    const flash = slide.querySelector('.tap-flash');
+    let lastTap = 0;
+    slide.addEventListener('click', (e) => {
+      if (e.target.closest('.rail')) return;
+      const now = Date.now();
+      if (now - lastTap < 300){
+        if (!liked){ liked = true; likeBtn.classList.add('liked'); likeBtn.innerHTML = HEART_FILLED + `<span class="count">${v.likes}</span>`; }
+        flash.classList.remove('burst'); void flash.offsetWidth; flash.classList.add('burst');
+      } else {
+        const vid = slide.querySelector('video');
+        vid.paused ? vid.play() : vid.pause();
+      }
+      lastTap = now;
+    });
+  });
+
+  // autoplay video in view, pause others
+  const vids = [...document.querySelectorAll('video')];
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const vid = entry.target;
+      if (entry.isIntersecting && entry.intersectionRatio > 0.6){
+        vid.play().catch(()=>{});
+      } else {
+        vid.pause();
+      }
+    });
+  }, { threshold: [0, 0.6, 1] });
+  vids.forEach(v => io.observe(v));
+
+  // first video needs a user gesture in some browsers; try to start muted
+  window.addEventListener('load', () => { vids[0] && vids[0].play().catch(()=>{}); });
+</script>
+</body>
+</html>
